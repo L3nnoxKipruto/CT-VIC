@@ -1,0 +1,200 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DataEntryApp.ViewModels"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             x:Class="DataEntryApp.Views.DataEntryView"
+             x:DataType="vm:DataEntryViewModel">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="40,20">
+        <!-- Form Progress Card -->
+        <Border Grid.Row="0" Classes="dms-card" Margin="60,0">
+            <StackPanel Spacing="20">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Data Entry Progress" FontWeight="SemiBold" Foreground="#64748B"/>
+                    <TextBlock Grid.Column="1" Text="{Binding ProgressPercent, StringFormat=\{0:0\}%}" 
+                               FontWeight="Bold" Foreground="{StaticResource TealPrimaryBrush}"/>
+                </Grid>
+                <ProgressBar Value="{Binding ProgressPercent}" Height="6" 
+                             Background="#F1F5F9" Foreground="{StaticResource TealPrimaryBrush}"
+                             CornerRadius="3"/>
+                
+                <UniformGrid Columns="4" Margin="0,10,0,0">
+                    <ToggleButton Content="Patient Info" Classes="segmented" IsChecked="{Binding IsStep1}" Command="{Binding GoToStepCommand}" CommandParameter="1"/>
+                    <ToggleButton Content="Clinical Info" Classes="segmented" IsChecked="{Binding IsStep2}" Command="{Binding GoToStepCommand}" CommandParameter="2" />
+                    <ToggleButton Content="Scan Parameters" Classes="segmented" IsChecked="{Binding IsStep3}" Command="{Binding GoToStepCommand}" CommandParameter="3"/>
+                    <ToggleButton Content="Settings &amp; Quality" Classes="segmented" IsChecked="{Binding IsStep4}" Command="{Binding GoToStepCommand}" CommandParameter="4"/>
+                </UniformGrid>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Form Card -->
+        <Border Grid.Row="1" Classes="dms-card" Margin="60,20">
+            <ScrollViewer>
+                <Panel Margin="0,0,15,0">
+                <!-- Step 1: Patient Information -->
+                <StackPanel Spacing="25" IsVisible="{Binding IsStep1}" Margin="0,0,0,20">
+                    <TextBlock Text="Patient Information" Classes="h2"/>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Patient ID *" FontSize="13" Foreground="#64748B"/>
+                        <TextBox Text="{Binding PatientIdSuffix}" Watermark="0001" Height="48" VerticalContentAlignment="Center">
+                            <TextBox.InnerLeftContent>
+                                <TextBlock Text="UMR" VerticalAlignment="Center" Margin="15,0,5,0" Foreground="#64748B" FontWeight="SemiBold"/>
+                            </TextBox.InnerLeftContent>
+                        </TextBox>
+                    </StackPanel>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Date of Examination *" FontSize="13" Foreground="#64748B"/>
+                        <CalendarDatePicker SelectedDate="{Binding Date}" HorizontalAlignment="Stretch" Height="48"/>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
+                            <TextBlock Text="Age" FontSize="13" Foreground="#64748B"/>
+                            <NumericUpDown Value="{Binding Age}" Height="48" Watermark="Years"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8" Margin="10,0,0,0">
+                            <TextBlock Text="Weight (kg)" FontSize="13" Foreground="#64748B"/>
+                            <NumericUpDown Value="{Binding Weight}" Height="48"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Step 2: Clinical Information -->
+                <StackPanel Spacing="25" IsVisible="{Binding IsStep2}" Margin="0,0,0,20">
+                    <TextBlock Text="Specific Category (Tick appropriate box)" Classes="h2"/>
+                    <StackPanel Spacing="15">
+                        <CheckBox Content="Acute abdomen" IsChecked="{Binding IsAcuteAbdomen}"/>
+                        <CheckBox Content="Abdominopelvic Trauma" IsChecked="{Binding IsAbdominopelvicTrauma}"/>
+                        <CheckBox Content="Abdominopelvic masses" IsChecked="{Binding IsAbdominopelvicMasses}"/>
+                    </StackPanel>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Specific Clinical Indication/Brief History" FontSize="13" Foreground="#64748B"/>
+                        <TextBox Text="{Binding SpecificHistory}" Height="80" AcceptsReturn="True" TextWrapping="Wrap" Watermark="Enter brief clinical history..."/>
+                    </StackPanel>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Name of Protocol Used" FontSize="13" Foreground="#64748B"/>
+                        <TextBox Text="{Binding ProtocolName}" Height="48" Watermark="e.g. Triphasic Abdomen"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Step 3: Scan Parameters -->
+                <StackPanel Spacing="25" IsVisible="{Binding IsStep3}" Margin="0,0,0,20">
+                    <TextBlock Text="Scan Parameters (Technical)" Classes="h2"/>
+                    <StackPanel Spacing="15">
+                        <Grid ColumnDefinitions="*,*" Margin="0,10">
+                            <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
+                                <TextBlock Text="kV" FontSize="13" Foreground="#64748B"/>
+                                <NumericUpDown Value="{Binding KvValue}" Height="48"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="8" Margin="10,0,0,0">
+                                <TextBlock Text="Tube Current (mAs)" FontSize="13" Foreground="#64748B"/>
+                                <NumericUpDown Value="{Binding MasValue}" Height="48"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*" Margin="0,10">
+                            <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
+                                <TextBlock Text="Slice Thickness (mm)" FontSize="13" Foreground="#64748B"/>
+                                <NumericUpDown Value="{Binding SliceThickness}" Height="48" Increment="0.25"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="8" Margin="10,0,0,0">
+                                <TextBlock Text="Rotation Time (Trot)" FontSize="13" Foreground="#64748B"/>
+                                <NumericUpDown Value="{Binding RotationTime}" Height="48" Increment="0.1"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*,*" Margin="0,10">
+                            <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
+                                <TextBlock Text="Pitch (p)" FontSize="13" Foreground="#64748B"/>
+                                <NumericUpDown Value="{Binding Pitch}" Height="48" Increment="0.1"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="8" Margin="10,0,5,0">
+                                <TextBlock Text="Beam Width (N×T)" FontSize="13" Foreground="#64748B"/>
+                                <NumericUpDown Value="{Binding BeamWidth}" Height="48"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="8" Margin="5,0,0,0">
+                                <TextBlock Text="Scanning Range (cm)" FontSize="13" Foreground="#64748B"/>
+                                <NumericUpDown Value="{Binding ScanningRange}" Height="48"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Step 4: Settings & Quality -->
+                <StackPanel Spacing="25" IsVisible="{Binding IsStep4}" Margin="0,0,0,20">
+                    <TextBlock Text="Settings &amp; Audit Quality" Classes="h2"/>
+                    <Grid ColumnDefinitions="*,*" Margin="0,0,0,15">
+                        <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
+                            <TextBlock Text="CTDIvol (mGy)" FontSize="13" Foreground="#64748B"/>
+                            <NumericUpDown Value="{Binding CtdiVol}" Height="48"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8" Margin="10,0,0,0">
+                            <TextBlock Text="Total DLP (mGy*cm)" FontSize="13" Foreground="#64748B"/>
+                            <NumericUpDown Value="{Binding DlpValue}" Height="48"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,*" Margin="0,10">
+                        <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,10,0">
+                            <TextBlock Text="Scanning Mode" FontSize="13" Foreground="#64748B"/>
+                            <ComboBox SelectedItem="{Binding ScanningMode}" HorizontalAlignment="Stretch" Height="48">
+                                <sys:String>Axial</sys:String>
+                                <sys:String>Helical</sys:String>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="8" Margin="10,0,0,0">
+                            <TextBlock Text="Reference Phantom" FontSize="13" Foreground="#64748B"/>
+                            <ComboBox SelectedItem="{Binding ReferencePhantom}" HorizontalAlignment="Stretch" Height="48">
+                                <sys:String>Body (16 cm)</sys:String>
+                                <sys:String>Head (8 cm)</sys:String>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <Grid ColumnDefinitions="*,*" Margin="0,10">
+                        <StackPanel Grid.Column="0" Spacing="15" VerticalAlignment="Center">
+                            <ToggleSwitch IsChecked="{Binding IsAecUsed}" Content="AEC Used?" OnContent="Yes" OffContent="No"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="15" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <ToggleSwitch IsChecked="{Binding IsImageQualityAccepted}" Content="Image Quality Accepted?" OnContent="Yes" OffContent="No"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource TealPrimaryBrush}" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+                </StackPanel>
+                </Panel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Footer Buttons -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="60,0,60,40">
+            <Button Grid.Column="0" Content="Previous" Command="{Binding PreviousStepCommand}" Width="120" Height="48" Background="#F8FAFC" BorderBrush="#E2E8F0"/>
+            
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="15">
+                <Button Content="Save Draft" Command="{Binding SaveDraftCommand}" Width="120" Height="48" Background="#F1F5F9" Foreground="#64748B"/>
+                
+                <Button Content="Next Step" Command="{Binding NextStepCommand}" 
+                        IsVisible="{Binding IsNotStep4}" Width="140" Height="48" 
+                        Background="{StaticResource TealPrimaryBrush}" Foreground="White" FontWeight="SemiBold"/>
+                
+                <Button Content="Finalize &amp; Submit" Command="{Binding SubmitCommand}" 
+                        IsVisible="{Binding IsStep4}" Width="160" Height="48" 
+                        Background="{StaticResource TealPrimaryBrush}" Foreground="White" FontWeight="SemiBold"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+
+    <UserControl.Styles>
+        <Style Selector="ToggleButton.segmented">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="ToggleButton.segmented:checked">
+            <Setter Property="Background" Value="{StaticResource TealPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Padding" Value="15,5"/>
+        </Style>
+    </UserControl.Styles>
+</UserControl>

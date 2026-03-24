@@ -1,0 +1,13 @@
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.doccache
+.vs/
+.idea/
+.vscode/
+*.suo
+*.user
+*.sln.doccache
+*.cache
+*.db

@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DataEntryApp.ViewModels"
+             x:Class="DataEntryApp.Views.AnalyticsView"
+             x:DataType="vm:AnalyticsViewModel">
+    <ScrollViewer>
+        <StackPanel Spacing="30" Margin="40">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Clinical Analytics" Classes="h1" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="Deep dive into dose averages and monthly trends" Foreground="#64748B"/>
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                <Border Grid.Row="0" Grid.Column="0" Classes="dms-card" Margin="0,0,10,20">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="Average CTDIvol" FontSize="16" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
+                            <TextBlock Text="{Binding AverageCtdi, StringFormat=\{0:F1\}}" FontSize="42" FontWeight="Bold" Foreground="#10B981" />
+                            <TextBlock Text="mGy" FontSize="18" Foreground="#94A3B8" Padding="0,0,0,8" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <TextBlock Text="Current Period Average" FontSize="12" Foreground="#94A3B8"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="1" Classes="dms-card" Margin="10,0,0,20">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="Average DLP" FontSize="16" FontWeight="SemiBold" Foreground="#64748B"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
+                            <TextBlock Text="{Binding AverageDlp, StringFormat=\{0:F0\}}" FontSize="42" FontWeight="Bold" Foreground="#6366F1" />
+                            <TextBlock Text="mGy*cm" FontSize="18" Foreground="#94A3B8" Padding="0,0,0,8" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <TextBlock Text="Current Period Average" FontSize="12" Foreground="#94A3B8"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.ColumnSpan="2" Classes="dms-card" MinHeight="200" Margin="0,0,0,20">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="Top Protocols by Volume" FontSize="18" FontWeight="SemiBold"/>
+                        <ItemsControl ItemsSource="{Binding TopProtocols}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,10" Padding="15" Background="#F8FAFC" CornerRadius="8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Spacing="5">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"/>
+                                                <TextBlock Text="{Binding AverageDlp, StringFormat=Avg DLP: \{0:F0\} mGy*cm}" FontSize="12" Foreground="#64748B"/>
+                                            </StackPanel>
+                                            <Border Grid.Column="1" Background="{StaticResource TealPrimaryBrush}" CornerRadius="20" Padding="12,4" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Count, StringFormat=\{0\} scans}" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Classes="dms-card" Height="400">
+                <StackPanel Spacing="20">
+                    <TextBlock Text="Monthly Dose Trends (Average DLP)" FontSize="18" FontWeight="SemiBold"/>
+                    
+                    <ItemsControl ItemsSource="{Binding Trends}" HorizontalAlignment="Stretch" Margin="0,20">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="6" VerticalAlignment="Bottom" Height="250"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel VerticalAlignment="Bottom" Spacing="10" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding AverageDose, StringFormat=\{0:F0\}}" HorizontalAlignment="Center" FontSize="12" Foreground="#64748B" FontWeight="SemiBold"/>
+                                    <Border Background="{StaticResource TealPrimaryBrush}" Width="40" Height="{Binding BarHeight}" CornerRadius="4,4,0,0" ToolTip.Tip="{Binding AverageDose, StringFormat=Average: \{0:F1\} mGy*cm}"/>
+                                    <TextBlock Text="{Binding MonthName}" HorizontalAlignment="Center" FontSize="12" Foreground="#94A3B8"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

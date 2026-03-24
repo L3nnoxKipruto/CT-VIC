@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DataEntryApp.ViewModels"
+             x:Class="DataEntryApp.Views.ExportView"
+             x:DataType="vm:ExportViewModel">
+    <ScrollViewer>
+        <StackPanel Spacing="30" Margin="40">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Report Generator" Classes="h1" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="Export clinical registry data for audit and research" Foreground="#64748B"/>
+            </StackPanel>
+
+            <Border Classes="dms-card" Width="600" HorizontalAlignment="Left" Padding="40">
+                <StackPanel Spacing="30">
+                    <Path Data="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M15.8,20H14L12,16.6L10,20H8.2L11.1,15.5L8.2,11H10L12,14.4L14,11H15.8L12.9,15.5L15.8,20M13,9V3.5L18.5,9H13Z"
+                          Fill="{StaticResource TealPrimaryBrush}" Width="64" Height="64" Stretch="Uniform" HorizontalAlignment="Center"/>
+                    
+                    <TextBlock Text="Export Full Registry" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="This action will generate a comprehensive Excel (.xlsx) file containing all clinical records currently stored in the local database. The file will include patient identifiers, scan parameters, and date stamps." 
+                               TextWrapping="Wrap" TextAlignment="Center" Foreground="#64748B" LineHeight="22"/>
+
+                    <!-- Security Reminder -->
+                    <Border Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="8" Padding="20">
+                        <StackPanel Orientation="Horizontal" Spacing="15">
+                            <Path Data="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" Fill="#EF4444" Width="24" Height="24" Stretch="Uniform"/>
+                            <StackPanel>
+                                <TextBlock Text="Security Reminder" FontWeight="SemiBold" Foreground="#991B1B"/>
+                                <TextBlock Text="Exported data contains Protected Health Information (PHI). Ensure the file is saved to a secure location and handled according to your department's compliance guidelines." 
+                                           TextWrapping="Wrap" FontSize="12" Foreground="#B91C1C" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="Generate Excel Report" Command="{Binding ExportDataCommand}" 
+                            Background="{StaticResource TealPrimaryBrush}" Foreground="White" 
+                            FontWeight="SemiBold" FontSize="16" Padding="0,15" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                    
+                    <TextBlock Text="{Binding ExportStatusLine}" HorizontalAlignment="Center" Foreground="#94A3B8" FontSize="12"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,59 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             xmlns:vm="using:DataEntryApp.ViewModels"
+             xmlns:views="using:DataEntryApp.Views"
+             xmlns:converters="using:DataEntryApp.Converters"
+             x:Class="DataEntryApp.App"
+             RequestedThemeVariant="Light">
+    <Application.DataTemplates>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DataEntryViewModel}">
+            <views:DataEntryView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:RecordsViewModel}">
+            <views:RecordsView />
+        </DataTemplate>
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <Color x:Key="TealPrimary">#2D8B7E</Color>
+        <SolidColorBrush x:Key="TealPrimaryBrush" Color="{StaticResource TealPrimary}" />
+        <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#12161D" />
+        <SolidColorBrush x:Key="MainBackgroundBrush" Color="#F7F9FB" />
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="White" />
+        <SolidColorBrush x:Key="BorderLightBrush" Color="#EDF0F2" />
+        
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
+    </Application.Resources>
+
+    <Application.Styles>
+        <sty:FluentAvaloniaTheme />
+        
+        <!-- RadiologyDMS Card Style -->
+        <Style Selector="Border.dms-card">
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}" />
+            <Setter Property="BoxShadow" Value="0 4 12 0 #0D000000" />
+            <Setter Property="Padding" Value="24" />
+        </Style>
+
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#1A1C1E" />
+        </Style>
+
+        <!-- Modern Input Styles -->
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#F9FAFB" />
+            <Setter Property="BorderBrush" Value="#E5E7EB" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+    </Application.Styles>
+</Application>

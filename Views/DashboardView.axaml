@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DataEntryApp.ViewModels"
+             x:Class="DataEntryApp.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+    <ScrollViewer>
+        <StackPanel Spacing="30" Margin="40">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Control Center" Classes="h1" Foreground="#1A1C1E" FontSize="28" FontWeight="Bold"/>
+                <TextBlock Text="Global Clinical Registry Overview" FontSize="14" Foreground="#64748B"/>
+            </StackPanel>
+            
+            <Grid ColumnDefinitions="*,*,*,*">
+                <!-- Total Records -->
+                <Border Grid.Column="0" Classes="dms-card">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Total Records" Foreground="#64748B" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding TotalEntries}" FontSize="32" FontWeight="Bold"/>
+                        <TextBlock Text="System Registry" FontSize="11" Foreground="#94A3B8"/>
+                    </StackPanel>
+                </Border>
+                <!-- Complete -->
+                <Border Grid.Column="1" Classes="dms-card">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Complete Files" Foreground="#10B981" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding CompleteCount}" FontSize="32" FontWeight="Bold"/>
+                        <ProgressBar Value="{Binding CompletionRate}" Height="4" Foreground="#10B981" Background="#ECFDF5"/>
+                    </StackPanel>
+                </Border>
+                <!-- Draft -->
+                <Border Grid.Column="2" Classes="dms-card">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Draft Records" Foreground="#F59E0B" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding DraftCount}" FontSize="32" FontWeight="Bold"/>
+                        <TextBlock Text="Needs review" FontSize="11" Foreground="#94A3B8"/>
+                    </StackPanel>
+                </Border>
+                <!-- Rate -->
+                <Border Grid.Column="3" Classes="dms-card">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Completion Rate" Foreground="#6366F1" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding CompletionRate, StringFormat=\{0:F1\}%}" FontSize="32" FontWeight="Bold"/>
+                        <TextBlock Text="Clinical Accuracy" FontSize="11" Foreground="#94A3B8"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Grid ColumnDefinitions="2*,1*">
+                <!-- Activity Chart Placeholder -->
+                <Border Grid.Column="0" Classes="dms-card" Height="350">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="Records Over Time (Weekly)" FontSize="18" FontWeight="SemiBold"/>
+                        <Grid VerticalAlignment="Bottom" Height="200" ColumnDefinitions="*,*,*,*,*,*,*" Margin="0,20">
+                            <!-- Simple mock bar chart using Borders -->
+                            <Border Grid.Column="0" Background="{StaticResource TealPrimaryBrush}" Height="40" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
+                            <Border Grid.Column="1" Background="{StaticResource TealPrimaryBrush}" Height="80" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
+                            <Border Grid.Column="2" Background="{StaticResource TealPrimaryBrush}" Height="60" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
+                            <Border Grid.Column="3" Background="{StaticResource TealPrimaryBrush}" Height="120" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
+                            <Border Grid.Column="4" Background="{StaticResource TealPrimaryBrush}" Height="90" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
+                            <Border Grid.Column="5" Background="{StaticResource TealPrimaryBrush}" Height="150" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
+                            <Border Grid.Column="6" Background="{StaticResource TealPrimaryBrush}" Height="{Binding TotalEntries}" MaxHeight="180" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Pie Chart / Distribution -->
+                <Border Grid.Column="1" Classes="dms-card">
+                    <StackPanel Spacing="20" HorizontalAlignment="Center">
+                        <TextBlock Text="File Distribution" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Left"/>
+                        <Grid Width="200" Height="200">
+                             <!-- Circular ring mock -->
+                             <Ellipse Stroke="#F1F5F9" StrokeThickness="25"/>
+                             <Arc StartAngle="0" SweepAngle="270" Stroke="{StaticResource TealPrimaryBrush}" StrokeThickness="25"/>
+                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                 <TextBlock Text="{Binding CompletionRate, StringFormat=\{0:0\}%}" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                 <TextBlock Text="Complete" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>
+                             </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            
+            <Border Classes="dms-card">
+                <StackPanel Spacing="20">
+                    <TextBlock Text="Recent Clinical Submissions" FontSize="18" FontWeight="SemiBold"/>
+                    <ItemsControl ItemsSource="{Binding LatestEntries}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="0,15" BorderThickness="0,0,0,1" BorderBrush="#F1F5F9">
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#F1F5F9" Margin="0,0,15,0">
+                                            <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" Fill="#64748B" Stretch="Uniform" Width="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding PatientId}" FontWeight="SemiBold" FontSize="14"/>
+                                            <TextBlock Text="{Binding ProtocolName}" FontSize="12" Foreground="#94A3B8"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding Status}" VerticalAlignment="Center" Margin="0,0,20,0" FontWeight="SemiBold" 
+                                                   Foreground="{Binding Status, Converter={StaticResource StatusToColorConverter}}"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding CreatedAt, StringFormat=\{0:MMM dd HH:mm\}}" VerticalAlignment="Center" Foreground="#94A3B8" FontSize="12"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

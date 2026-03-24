@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DataEntryApp.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             x:Class="DataEntryApp.Views.RecordsView"
+             x:DataType="vm:RecordsViewModel">
+    <Grid RowDefinitions="Auto,*" Margin="40">
+        <!-- Header & Search -->
+        <Grid Grid.Row="0" RowDefinitions="Auto,Auto" Margin="0,0,0,25">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="Clinical Registry" Classes="h1" FontSize="24" FontWeight="Bold"/>
+                    <TextBlock Text="Manage and audit all radiological patient records" Foreground="#64748B" Margin="0,5,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button Content="Export Excel" Command="{Binding ExportToExcelCommand}" Background="White" BorderBrush="#E2E8F0" Padding="15,8"/>
+                    <Button Content="Refresh" Command="{Binding LoadEntriesCommand}" Background="{StaticResource TealPrimaryBrush}" Foreground="White" Padding="15,8"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,20,0,0">
+                <Border Background="White" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="8" Padding="10,2">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Path Data="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7.01,14 5,11.99 5,9.5C5,7.01 7.01,5 9.5,5C11.99,5 14,7.01 14,9.5C14,11.99 11.99,14 9.5,14Z" 
+                              Fill="#94A3B8" Width="18" Height="18" Margin="5,0,10,0" Stretch="Uniform"/>
+                        <TextBox Grid.Column="1" Text="{Binding SearchText}" Watermark="Search by Patient ID (e.g. UMR001)..." Classes="borderless" Background="Transparent"/>
+                    </Grid>
+                </Border>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="20,0,0,0">
+                    <TextBlock Text="Filter:" VerticalAlignment="Center" Foreground="#64748B"/>
+                    <ComboBox SelectedItem="{Binding StatusFilter}" Width="150" Height="40">
+                        <sys:String>All</sys:String>
+                        <sys:String>Complete</sys:String>
+                        <sys:String>Draft</sys:String>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Data Table -->
+        <Border Grid.Row="1" Classes="dms-card" Padding="0">
+            <DataGrid ItemsSource="{Binding Entries}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Patient ID" Binding="{Binding PatientId}" Width="1.5*"/>
+                    <DataGridTextColumn Header="Protocol" Binding="{Binding ProtocolName}" Width="2*"/>
+                    <DataGridTemplateColumn Header="Status" Width="*">
+                        <DataTemplate>
+                            <Border Background="{Binding Status, Converter={StaticResource StatusToColorConverter}}" Opacity="0.1" CornerRadius="12" Padding="8,4">
+                                <TextBlock Text="{Binding Status}" Foreground="{Binding Status, Converter={StaticResource StatusToColorConverter}}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="CTDIvol" Binding="{Binding CTDIvol}" Width="*"/>
+                    <DataGridTextColumn Header="DLP" Binding="{Binding DLP}" Width="*"/>
+                    <DataGridTextColumn Header="Saved At" Binding="{Binding CreatedAt, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" Width="1.5*"/>
+                    <DataGridTemplateColumn Header="Actions" Width="120">
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                                <Button Content="Edit" Classes="action-btn" Command="{Binding $parent[DataGrid].((vm:RecordsViewModel)DataContext).EditEntryCommand}" CommandParameter="{Binding}"/>
+                                <Button Content="Del" Foreground="Red" Classes="action-btn" Command="{Binding $parent[DataGrid].((vm:RecordsViewModel)DataContext).DeleteEntryCommand}" CommandParameter="{Binding}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+
+    <UserControl.Styles>
+        <Style Selector="Button.action-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </UserControl.Styles>
+</UserControl>

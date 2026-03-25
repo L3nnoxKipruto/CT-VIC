@@ -13,9 +13,22 @@ public class StatusToColorConverter : IValueConverter
         {
             return status switch
             {
-                "Complete" => Brushes.Green,
-                "Draft" => Brushes.Orange,
+                "Complete" or "Success" => Brushes.Teal,
+                "Draft" or "Info" => Brushes.Gray,
+                "Warning" => Brushes.Orange,
+                "Error" => Brushes.Red,
                 _ => Brushes.Gray
+            };
+        }
+        if (value is Messages.NotificationType type)
+        {
+            return type switch
+            {
+                Messages.NotificationType.Success => Brushes.Teal,
+                Messages.NotificationType.Info => Brush.Parse("#3B82F6"),    // Blue 500
+                Messages.NotificationType.Warning => Brush.Parse("#F59E0B"), // Amber 500
+                Messages.NotificationType.Error => Brush.Parse("#EF4444"),   // Red 500
+                _ => Brush.Parse("#64748B")                         // Slate 500
             };
         }
         return Brushes.Gray;

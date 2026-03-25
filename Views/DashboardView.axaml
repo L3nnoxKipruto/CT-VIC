@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:DataEntryApp.ViewModels"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              x:Class="DataEntryApp.Views.DashboardView"
              x:DataType="vm:DashboardViewModel">
     <ScrollViewer>
@@ -49,17 +50,7 @@
                 <!-- Activity Chart Placeholder -->
                 <Border Grid.Column="0" Classes="dms-card" Height="350">
                     <StackPanel Spacing="20">
-                        <TextBlock Text="Records Over Time (Weekly)" FontSize="18" FontWeight="SemiBold"/>
-                        <Grid VerticalAlignment="Bottom" Height="200" ColumnDefinitions="*,*,*,*,*,*,*" Margin="0,20">
-                            <!-- Simple mock bar chart using Borders -->
-                            <Border Grid.Column="0" Background="{StaticResource TealPrimaryBrush}" Height="40" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
-                            <Border Grid.Column="1" Background="{StaticResource TealPrimaryBrush}" Height="80" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
-                            <Border Grid.Column="2" Background="{StaticResource TealPrimaryBrush}" Height="60" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
-                            <Border Grid.Column="3" Background="{StaticResource TealPrimaryBrush}" Height="120" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
-                            <Border Grid.Column="4" Background="{StaticResource TealPrimaryBrush}" Height="90" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
-                            <Border Grid.Column="5" Background="{StaticResource TealPrimaryBrush}" Height="150" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
-                            <Border Grid.Column="6" Background="{StaticResource TealPrimaryBrush}" Height="{Binding TotalEntries}" MaxHeight="180" VerticalAlignment="Bottom" CornerRadius="4,4,0,0" Margin="5"/>
-                        </Grid>
+                        <lvc:CartesianChart Series="{Binding ActivitySeries}" XAxes="{Binding XAxes}" Height="250" />
                     </StackPanel>
                 </Border>
 
@@ -68,9 +59,7 @@
                     <StackPanel Spacing="20" HorizontalAlignment="Center">
                         <TextBlock Text="File Distribution" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Left"/>
                         <Grid Width="200" Height="200">
-                             <!-- Circular ring mock -->
-                             <Ellipse Stroke="#F1F5F9" StrokeThickness="25"/>
-                             <Arc StartAngle="0" SweepAngle="270" Stroke="{StaticResource TealPrimaryBrush}" StrokeThickness="25"/>
+                             <lvc:PieChart Series="{Binding DistributionSeries}" InitialRotation="-90" MaxAngle="270" />
                              <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                  <TextBlock Text="{Binding CompletionRate, StringFormat=\{0:0\}%}" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
                                  <TextBlock Text="Complete" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center"/>

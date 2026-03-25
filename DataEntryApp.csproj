@@ -29,4 +29,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
+  </ItemGroup>
 </Project>

@@ -41,16 +41,37 @@ public partial class MainViewModel : ViewModelBase
         SelectedMenuItem = MenuItems[1];
         CurrentPage = SelectedMenuItem.Page;
 
+        Notification = new NotificationViewModel();
+
         WeakReferenceMessenger.Default.Register<EditEntryMessage>(this, (r, m) =>
         {
             CurrentPage = DataEntryPage;
             SelectedMenuItem = MenuItems[1];
         });
+
+        WeakReferenceMessenger.Default.Register<NotificationMessage>(this, (r, m) =>
+        {
+            Notification.Show(m.Title, m.Message, m.Type);
+        });
     }
+
+    public NotificationViewModel Notification { get; }
+
+    [ObservableProperty]
+    private bool _isInitializing = true;
 
     private async Task InitializeAsync()
     {
-        await _dbService.InitializeAsync();
+        try 
+        {
+            await _dbService.InitializeAsync();
+            // Artificial delay for smooth splash screen transition
+            await Task.Delay(2000);
+        }
+        finally
+        {
+            IsInitializing = false;
+        }
     }
 
     public DashboardViewModel DashboardPage { get; }

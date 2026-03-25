@@ -25,7 +25,10 @@ public partial class RecordsViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<Entry> _entries = new();
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string _searchText = string.Empty;
-    [ObservableProperty] private string _statusFilter = "All"; // All, Complete, Draft
+    [ObservableProperty] private string _statusFilter = "All"; // All, Complete, Incomplete
+    [ObservableProperty] private DateTime? _dateFrom;
+    [ObservableProperty] private DateTime? _dateTo;
+    [ObservableProperty] private string _categoryFilter = "All Indication";
 
     public RecordsViewModel(DatabaseService dbService)
     {
@@ -74,11 +77,51 @@ public partial class RecordsViewModel : ViewModelBase
         if (StatusFilter != "All")
             filtered = filtered.Where(e => e.Status == StatusFilter);
 
-        Entries = new ObservableCollection<Entry>(filtered);
+        if (DateFrom.HasValue)
+            filtered = filtered.Where(e => e.Date.Date >= DateFrom.Value.Date);
+        
+        if (DateTo.HasValue)
+            filtered = filtered.Where(e => e.Date.Date <= DateTo.Value.Date);
+
+        if (CategoryFilter != "All Indication")
+        {
+            filtered = filtered.Where(e => 
+                (CategoryFilter == "Acute Abdomen" && e.IsAcuteAbdomen) ||
+                (CategoryFilter == "Trauma" && e.IsAbdominopelvicTrauma) ||
+                (CategoryFilter == "Masses" && e.IsAbdominopelvicMasses));
+        }
+
+        var finalEntries = filtered.ToList();
+
+        // Calculate DRLs (75th percentile) for highlighting
+        var acuteDrl = CalculateP75(finalEntries.Where(e => e.IsAcuteAbdomen).Select(e => e.DLP));
+        var traumaDrl = CalculateP75(finalEntries.Where(e => e.IsAbdominopelvicTrauma).Select(e => e.DLP));
+        var massesDrl = CalculateP75(finalEntries.Where(e => e.IsAbdominopelvicMasses).Select(e => e.DLP));
+
+        foreach (var entry in finalEntries)
+        {
+            if (entry.IsAcuteAbdomen && acuteDrl > 0) entry.IsHighDose = entry.DLP > acuteDrl;
+            else if (entry.IsAbdominopelvicTrauma && traumaDrl > 0) entry.IsHighDose = entry.DLP > traumaDrl;
+            else if (entry.IsAbdominopelvicMasses && massesDrl > 0) entry.IsHighDose = entry.DLP > massesDrl;
+        }
+
+        Entries = new ObservableCollection<Entry>(finalEntries);
+    }
+
+    private double CalculateP75(IEnumerable<double> values)
+    {
+        var list = values.ToList();
+        if (list.Count < 4) return 0; // Need a decent sample for DRLs
+        var sorted = list.OrderBy(v => v).ToList();
+        int index = (int)(0.75 * (sorted.Count - 1));
+        return sorted[index];
     }
 
     partial void OnSearchTextChanged(string value) => ApplyFilter();
     partial void OnStatusFilterChanged(string value) => ApplyFilter();
+    partial void OnDateFromChanged(DateTime? value) => ApplyFilter();
+    partial void OnDateToChanged(DateTime? value) => ApplyFilter();
+    partial void OnCategoryFilterChanged(string value) => ApplyFilter();
 
     private async Task DeleteEntryAsync(Entry? entry)
     {
@@ -89,6 +132,18 @@ public partial class RecordsViewModel : ViewModelBase
             _allEntries.Remove(entry);
             ApplyFilter();
             WeakReferenceMessenger.Default.Send(new EntryCreatedMessage(entry)); // Trigger stats update
+            
+            WeakReferenceMessenger.Default.Send(new NotificationMessage(
+                "Record Deleted",
+                $"Patient {entry.PatientId} has been removed from the registry.",
+                NotificationType.Success));
+        }
+        else
+        {
+             WeakReferenceMessenger.Default.Send(new NotificationMessage(
+                "Delete Failed",
+                "Could not remove the record from the database.",
+                NotificationType.Error));
         }
     }
 
@@ -174,11 +229,20 @@ public partial class RecordsViewModel : ViewModelBase
 
                     await using var stream = await file.OpenWriteAsync();
                     workbook.SaveAs(stream);
+
+                    WeakReferenceMessenger.Default.Send(new NotificationMessage(
+                        "Export Complete",
+                        "The clinical registry has been successfully exported to Excel.",
+                        NotificationType.Success));
+
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Export failed: {ex.Message}");
+                    WeakReferenceMessenger.Default.Send(new NotificationMessage(
+                        "Export Failed",
+                        $"An error occurred: {ex.Message}",
+                        NotificationType.Error));
                     return false;
                 }
             }

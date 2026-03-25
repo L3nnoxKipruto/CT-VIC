@@ -61,6 +61,11 @@ public partial class DataEntryViewModel : ViewModelBase
     [ObservableProperty] private string? _statusMessage;
     [ObservableProperty] private bool _isBusy;
 
+    [ObservableProperty] private string _step1Error = string.Empty;
+    [ObservableProperty] private string _step2Error = string.Empty;
+    [ObservableProperty] private string _step3Error = string.Empty;
+    [ObservableProperty] private string _step4Error = string.Empty;
+
     public DataEntryViewModel(DatabaseService dbService)
     {
         _dbService = dbService;
@@ -139,12 +144,40 @@ public partial class DataEntryViewModel : ViewModelBase
 
     private void NextStep() 
     { 
-        if (CurrentStep == 1 && string.IsNullOrWhiteSpace(PatientIdSuffix))
-        {
-            StatusMessage = "Patient ID is mandatory to continue.";
-            return;
-        }
+        if (!ValidateCurrentStep()) return;
         if (CurrentStep < 4) { CurrentStep++; StatusMessage = string.Empty; UpdateProgress(); } 
+    }
+
+    private bool ValidateCurrentStep()
+    {
+        ClearStepErrors();
+        if (CurrentStep == 1)
+        {
+            if (string.IsNullOrWhiteSpace(PatientIdSuffix)) { Step1Error = "Patient ID is mandatory."; return false; }
+            if (Age <= 0) { Step1Error = "Age is required."; return false; }
+            if (Weight <= 0) { Step1Error = "Weight is required."; return false; }
+            if (Height <= 0) { Step1Error = "Height is required."; return false; }
+        }
+        else if (CurrentStep == 2)
+        {
+            if (!IsAcuteAbdomen && !IsAbdominopelvicTrauma && !IsAbdominopelvicMasses) { Step2Error = "Select at least one category."; return false; }
+            if (string.IsNullOrWhiteSpace(SpecificHistory)) { Step2Error = "History is required."; return false; }
+            if (string.IsNullOrWhiteSpace(ProtocolName)) { Step2Error = "Protocol Name is required."; return false; }
+        }
+        else if (CurrentStep == 3)
+        {
+            if (KvValue <= 0 || MasValue <= 0) { Step3Error = "Technical parameters required."; return false; }
+            if (Pitch <= 0 || BeamWidth <= 0 || ScanningRange <= 0) { Step3Error = "Scan geometry required."; return false; }
+        }
+        return true;
+    }
+
+    private void ClearStepErrors()
+    {
+        Step1Error = string.Empty;
+        Step2Error = string.Empty;
+        Step3Error = string.Empty;
+        Step4Error = string.Empty;
     }
     
     private bool CanNextStep() 
@@ -169,15 +202,51 @@ public partial class DataEntryViewModel : ViewModelBase
         PreviousStepCommand.NotifyCanExecuteChanged();
     }
 
-    private async Task SaveDraftAsync() => await SaveAsync("Draft");
+    partial void OnPatientIdSuffixChanged(string value)
+    {
+        if (value.Length >= 3 && string.IsNullOrEmpty(_editingEntryId))
+        {
+            _ = LookupPatientHistoryAsync($"UMR{value}");
+        }
+    }
+
+    private async Task LookupPatientHistoryAsync(string patientId)
+    {
+        var latest = await _dbService.GetLatestEntryByPatientIdAsync(patientId);
+        if (latest != null)
+        {
+            // Auto-fill demographics if they are currently 0/empty
+            if (Age == 0) Age = latest.Age;
+            if (Weight == 0) Weight = latest.Weight;
+            if (Height == 0) Height = latest.Height;
+            StatusMessage = "Found previous records. Demographics auto-filled.";
+            _ = Task.Delay(3000).ContinueWith(_ => { if (StatusMessage.Contains("Found")) StatusMessage = string.Empty; });
+        }
+    }
+
+    private async Task SaveDraftAsync() => await SaveAsync("Incomplete");
     private async Task SubmitAsync() => await SaveAsync("Complete");
 
     private async Task SaveAsync(string status)
     {
+        ClearStepErrors();
         if (string.IsNullOrWhiteSpace(PatientIdSuffix))
         {
-            StatusMessage = "Cannot save: Patient ID is required.";
+            Step1Error = "Patient ID is mandatory to save.";
+            CurrentStep = 1; UpdateProgress();
             return;
+        }
+
+        if (status == "Complete")
+        {
+            // Fully validate all steps
+            if (Age <= 0 || Weight <= 0 || Height <= 0) { Step1Error = "Demographics required for completion."; CurrentStep = 1; UpdateProgress(); return; }
+            if (!IsAcuteAbdomen && !IsAbdominopelvicTrauma && !IsAbdominopelvicMasses || string.IsNullOrWhiteSpace(SpecificHistory) || string.IsNullOrWhiteSpace(ProtocolName)) 
+            { Step2Error = "Clinical data required for completion."; CurrentStep = 2; UpdateProgress(); return; }
+            if (KvValue <= 0 || MasValue <= 0 || Pitch <= 0 || BeamWidth <= 0 || ScanningRange <= 0) 
+            { Step3Error = "Technical data required for completion."; CurrentStep = 3; UpdateProgress(); return; }
+            if (CtdiVol <= 0 || DlpValue <= 0) 
+            { Step4Error = "Dose data required for completion."; return; }
         }
 
         IsBusy = true;
@@ -218,10 +287,19 @@ public partial class DataEntryViewModel : ViewModelBase
             var success = await _dbService.SaveEntryAsync(entry);
             if (success)
             {
-                StatusMessage = $"Record saved as {status}!";
+                WeakReferenceMessenger.Default.Send(new NotificationMessage(
+                    status == "Complete" ? "Record Finalized" : "Draft Saved",
+                    $"Patient {entry.PatientId} has been successfully recorded.",
+                    NotificationType.Success));
+                
                 WeakReferenceMessenger.Default.Send(new EntryCreatedMessage(entry));
                 if (status == "Complete") ResetWizard();
             }
+        }
+        catch (Exception ex)
+        {
+            var msg = ex.InnerException != null ? $"{ex.Message} ({ex.InnerException.Message})" : ex.Message;
+            ShowError($"Failed to save: {msg}");
         }
         finally
         {
@@ -229,8 +307,15 @@ public partial class DataEntryViewModel : ViewModelBase
         }
     }
 
+    private void ShowError(string message) => 
+        WeakReferenceMessenger.Default.Send(new NotificationMessage("Validation Error", message, NotificationType.Error));
+
+    private void ShowWarning(string message) => 
+        WeakReferenceMessenger.Default.Send(new NotificationMessage("Clinical Warning", message, NotificationType.Warning));
+
     private void ResetWizard()
     {
+        ClearStepErrors();
         CurrentStep = 1;
         UpdateProgress();
         _editingEntryId = string.Empty;

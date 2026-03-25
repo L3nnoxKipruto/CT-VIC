@@ -44,6 +44,9 @@ public class Entry
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool IsHighDose { get; set; }
+
     public bool IsComplete => !string.IsNullOrEmpty(PatientId) && 
                               !string.IsNullOrEmpty(ProtocolName) && 
                               CTDIvol > 0 && 

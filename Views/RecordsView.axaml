@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:DataEntryApp.ViewModels"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:ui="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:models="using:DataEntryApp.Models"
              x:Class="DataEntryApp.Views.RecordsView"
              x:DataType="vm:RecordsViewModel">
     <Grid RowDefinitions="Auto,*" Margin="40">
@@ -18,29 +20,67 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,20,0,0">
-                <Border Background="White" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="8" Padding="10,2">
-                    <Grid ColumnDefinitions="Auto,*">
-                        <Path Data="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7.01,14 5,11.99 5,9.5C5,7.01 7.01,5 9.5,5C11.99,5 14,7.01 14,9.5C14,11.99 11.99,14 9.5,14Z" 
-                              Fill="#94A3B8" Width="18" Height="18" Margin="5,0,10,0" Stretch="Uniform"/>
-                        <TextBox Grid.Column="1" Text="{Binding SearchText}" Watermark="Search by Patient ID (e.g. UMR001)..." Classes="borderless" Background="Transparent"/>
-                    </Grid>
-                </Border>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="20,0,0,0">
-                    <TextBlock Text="Filter:" VerticalAlignment="Center" Foreground="#64748B"/>
-                    <ComboBox SelectedItem="{Binding StatusFilter}" Width="150" Height="40">
-                        <sys:String>All</sys:String>
-                        <sys:String>Complete</sys:String>
-                        <sys:String>Draft</sys:String>
-                    </ComboBox>
-                </StackPanel>
+            <Grid Grid.Row="1" RowDefinitions="Auto,Auto" Margin="0,20,0,0">
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                    <Border Background="White" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="8" Padding="10,2">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Path Data="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7.01,14 5,11.99 5,9.5C5,7.01 7.01,5 9.5,5C11.99,5 14,7.01 14,9.5C14,11.99 11.99,14 9.5,14Z" 
+                                  Fill="#94A3B8" Width="18" Height="18" Margin="5,0,10,0" Stretch="Uniform"/>
+                            <TextBox Grid.Column="1" Text="{Binding SearchText}" Watermark="Search by Patient ID (e.g. UMR001)..." VerticalAlignment="Center" BorderThickness="0" Background="Transparent"/>
+                        </Grid>
+                    </Border>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="20,0,0,0">
+                        <TextBlock Text="Status:" VerticalAlignment="Center" Foreground="#64748B"/>
+                        <ComboBox SelectedItem="{Binding StatusFilter}" Width="120" Height="36">
+                            <sys:String>All</sys:String>
+                            <sys:String>Complete</sys:String>
+                            <sys:String>Incomplete</sys:String>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+
+                <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,15,0,0">
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,20,10">
+                        <TextBlock Text="From:" VerticalAlignment="Center" Foreground="#64748B" FontSize="12"/>
+                        <CalendarDatePicker SelectedDate="{Binding DateFrom}" Width="150" Height="36"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,20,10">
+                        <TextBlock Text="To:" VerticalAlignment="Center" Foreground="#64748B" FontSize="12"/>
+                        <CalendarDatePicker SelectedDate="{Binding DateTo}" Width="150" Height="36"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                        <TextBlock Text="Category:" VerticalAlignment="Center" Foreground="#64748B" FontSize="12"/>
+                        <ComboBox SelectedItem="{Binding CategoryFilter}" Width="160" Height="36">
+                            <sys:String>All Indication</sys:String>
+                            <sys:String>Acute Abdomen</sys:String>
+                            <sys:String>Trauma</sys:String>
+                            <sys:String>Masses</sys:String>
+                        </ComboBox>
+                    </StackPanel>
+                </WrapPanel>
             </Grid>
         </Grid>
 
         <!-- Data Table -->
-        <Border Grid.Row="1" Classes="dms-card" Padding="0">
-            <DataGrid ItemsSource="{Binding Entries}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" SelectionMode="Single">
-                <DataGrid.Columns>
+        <Panel Grid.Row="1">
+            <Border Classes="dms-card" Padding="0">
+                <Panel>
+                    <DataGrid ItemsSource="{Binding Entries}" AutoGenerateColumns="False" IsReadOnly="True" 
+                              GridLinesVisibility="Horizontal" SelectionMode="Single">
+                    <DataGrid.Styles>
+                        <Style Selector="DataGridRow" x:DataType="models:Entry">
+                            <Setter Property="Tag" Value="{Binding IsHighDose}"/>
+                        </Style>
+                        <Style Selector="DataGridRow:not(:selected)">
+                            <Style Selector="^ /template/ Border#RowSelectionIndicator">
+                                <Setter Property="IsVisible" Value="False" />
+                            </Style>
+                        </Style>
+                        <Style Selector="DataGridRow">
+                            <Setter Property="Background" Value="Transparent"/>
+                        </Style>
+                    </DataGrid.Styles>
+                    <DataGrid.Columns>
                     <DataGridTextColumn Header="Patient ID" Binding="{Binding PatientId}" Width="1.5*"/>
                     <DataGridTextColumn Header="Protocol" Binding="{Binding ProtocolName}" Width="2*"/>
                     <DataGridTemplateColumn Header="Status" Width="*">
@@ -63,10 +103,38 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-        </Border>
+            
+            <!-- Empty State Overlay -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" 
+                        IsVisible="{Binding !Entries.Count}" Spacing="20">
+                <ui:SymbolIcon Symbol="Find" FontSize="64" Foreground="#CBD5E1"/>
+                <StackPanel Spacing="5">
+                    <TextBlock Text="No records found" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="#475569"/>
+                    <TextBlock Text="Try adjusting your filters or search terms" HorizontalAlignment="Center" Foreground="#94A3B8"/>
+                </StackPanel>
+                <Button Content="Clear All Filters" Command="{Binding LoadEntriesCommand}" 
+                        HorizontalAlignment="Center" Classes="accent"/>
+            </StackPanel>
+
+            <!-- Loading Overlay -->
+            <Border Background="White" Opacity="0.7" IsVisible="{Binding IsLoading}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="15">
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="2" Background="#E2E8F0" Foreground="{StaticResource TealPrimaryBrush}"/>
+                    <TextBlock Text="Updating Clinical Registry..." Foreground="#64748B" FontSize="12" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            </Panel>
+            </Border>
+        </Panel>
     </Grid>
 
     <UserControl.Styles>
+        <Style Selector="DataGridRow">
+             <Style Selector="^[Tag=True]">
+                <Setter Property="Background" Value="#FFF1F2"/> <!-- Rose 50 -->
+            </Style>
+        </Style>
+
         <Style Selector="Button.action-btn">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Padding" Value="5"/>

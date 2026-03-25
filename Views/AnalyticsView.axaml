@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:DataEntryApp.ViewModels"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              x:Class="DataEntryApp.Views.AnalyticsView"
              x:DataType="vm:AnalyticsViewModel">
     <ScrollViewer>
@@ -10,31 +11,74 @@
                 <TextBlock Text="Deep dive into dose averages and monthly trends" Foreground="#64748B"/>
             </StackPanel>
 
-            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
-                <Border Grid.Row="0" Grid.Column="0" Classes="dms-card" Margin="0,0,10,20">
-                    <StackPanel Spacing="15">
-                        <TextBlock Text="Average CTDIvol" FontSize="16" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
-                            <TextBlock Text="{Binding AverageCtdi, StringFormat=\{0:F1\}}" FontSize="42" FontWeight="Bold" Foreground="#10B981" />
-                            <TextBlock Text="mGy" FontSize="18" Foreground="#94A3B8" Padding="0,0,0,8" VerticalAlignment="Bottom"/>
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto">
+                <!-- Row 0: Averages -->
+                <Border Grid.Row="0" Grid.Column="0" Classes="dms-card" Margin="0,0,10,10">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Average CTDIvol" FontSize="14" Foreground="#64748B"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding AverageCtdi, StringFormat=\{0:F1\}}" FontSize="32" FontWeight="Bold" Foreground="#10B981" />
+                            <TextBlock Text="mGy" FontSize="14" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                         </StackPanel>
-                        <TextBlock Text="Current Period Average" FontSize="12" Foreground="#94A3B8"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Row="0" Grid.Column="1" Classes="dms-card" Margin="10,0,0,20">
-                    <StackPanel Spacing="15">
-                        <TextBlock Text="Average DLP" FontSize="16" FontWeight="SemiBold" Foreground="#64748B"/>
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
-                            <TextBlock Text="{Binding AverageDlp, StringFormat=\{0:F0\}}" FontSize="42" FontWeight="Bold" Foreground="#6366F1" />
-                            <TextBlock Text="mGy*cm" FontSize="18" Foreground="#94A3B8" Padding="0,0,0,8" VerticalAlignment="Bottom"/>
+                <Border Grid.Row="0" Grid.Column="1" Classes="dms-card" Margin="10,0,0,10">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Average DLP" FontSize="14" Foreground="#64748B"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding AverageDlp, StringFormat=\{0:F0\}}" FontSize="32" FontWeight="Bold" Foreground="#6366F1" />
+                            <TextBlock Text="mGy*cm" FontSize="14" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                         </StackPanel>
-                        <TextBlock Text="Current Period Average" FontSize="12" Foreground="#94A3B8"/>
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="1" Grid.ColumnSpan="2" Classes="dms-card" MinHeight="200" Margin="0,0,0,20">
+                <!-- Row 1: P75 (DRL) -->
+                <Border Grid.Row="1" Grid.Column="0" Classes="dms-card" Margin="0,10,10,20">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Facility DRL (P75 CTDI)" FontSize="14" Foreground="#64748B"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding P75Ctdi, StringFormat=\{0:F1\}}" FontSize="32" FontWeight="Bold" Foreground="#F59E0B" />
+                            <TextBlock Text="mGy" FontSize="14" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Classes="dms-card" Margin="10,10,0,20">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Facility DRL (P75 DLP)" FontSize="14" Foreground="#64748B"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding P75Dlp, StringFormat=\{0:F0\}}" FontSize="32" FontWeight="Bold" Foreground="#EC4899" />
+                            <TextBlock Text="mGy*cm" FontSize="14" Foreground="#94A3B8" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="2" Grid.Column="0" Classes="dms-card" MinHeight="200" Margin="0,0,10,20">
                     <StackPanel Spacing="20">
-                        <TextBlock Text="Top Protocols by Volume" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock Text="Weight Group Averages" FontSize="18" FontWeight="SemiBold"/>
+                        <ItemsControl ItemsSource="{Binding WeightStats}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,10" Padding="12" Background="#F1F5F9" CornerRadius="8">
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1" Margin="20,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding AverageDlp, StringFormat=\{0:F0\} mGy*cm}" FontSize="12" FontWeight="SemiBold" Foreground="#6366F1"/>
+                                                <TextBlock Text="Avg DLP" FontSize="10" Foreground="#64748B"/>
+                                            </StackPanel>
+                                            <Border Grid.Column="2" Background="#E2E8F0" CornerRadius="4" Padding="8,2">
+                                                <TextBlock Text="{Binding Count, StringFormat=\{0\} obs}" FontSize="10" Foreground="#475569"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="2" Grid.Column="1" Classes="dms-card" MinHeight="200" Margin="10,0,0,20">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="Top Protocols" FontSize="18" FontWeight="SemiBold"/>
                         <ItemsControl ItemsSource="{Binding TopProtocols}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -56,26 +100,25 @@
                 </Border>
             </Grid>
 
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="0,0,0,20">
+                <Border Grid.Column="0" Classes="dms-card" Height="350" Margin="0,0,10,0">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="Indication Distribution" FontSize="18" FontWeight="SemiBold"/>
+                        <lvc:PieChart Series="{Binding CategorySeries}" Height="250" LegendPosition="Right"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Classes="dms-card" Height="350" Margin="10,0,0,0">
+                    <StackPanel Spacing="20">
+                        <TextBlock Text="Image Quality Acceptance" FontSize="18" FontWeight="SemiBold"/>
+                        <lvc:PieChart Series="{Binding QualitySeries}" Height="250" InitialRotation="-90" MaxAngle="270"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
             <Border Classes="dms-card" Height="400">
                 <StackPanel Spacing="20">
                     <TextBlock Text="Monthly Dose Trends (Average DLP)" FontSize="18" FontWeight="SemiBold"/>
-                    
-                    <ItemsControl ItemsSource="{Binding Trends}" HorizontalAlignment="Stretch" Margin="0,20">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="6" VerticalAlignment="Bottom" Height="250"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel VerticalAlignment="Bottom" Spacing="10" HorizontalAlignment="Center">
-                                    <TextBlock Text="{Binding AverageDose, StringFormat=\{0:F0\}}" HorizontalAlignment="Center" FontSize="12" Foreground="#64748B" FontWeight="SemiBold"/>
-                                    <Border Background="{StaticResource TealPrimaryBrush}" Width="40" Height="{Binding BarHeight}" CornerRadius="4,4,0,0" ToolTip.Tip="{Binding AverageDose, StringFormat=Average: \{0:F1\} mGy*cm}"/>
-                                    <TextBlock Text="{Binding MonthName}" HorizontalAlignment="Center" FontSize="12" Foreground="#94A3B8"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <lvc:CartesianChart Series="{Binding DoseSeries}" XAxes="{Binding XAxes}" Height="300"/>
                 </StackPanel>
             </Border>
         </StackPanel>

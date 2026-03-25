@@ -35,11 +35,20 @@
         <!-- RadiologyDMS Card Style -->
         <Style Selector="Border.dms-card">
             <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
-            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="CornerRadius" Value="16" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}" />
-            <Setter Property="BoxShadow" Value="0 4 12 0 #0D000000" />
+            <Setter Property="BoxShadow" Value="0 8 20 0 #08000000" />
             <Setter Property="Padding" Value="24" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.dms-card:pointerover">
+            <Setter Property="BoxShadow" Value="0 12 30 0 #0F000000" />
         </Style>
 
         <Style Selector="TextBlock.h2">
@@ -52,8 +61,24 @@
         <Style Selector="TextBox">
             <Setter Property="Background" Value="#F9FAFB" />
             <Setter Property="BorderBrush" Value="#E5E7EB" />
-            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="12,10" />
+        </Style>
+
+        <!-- Modern Button Hover Effects -->
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.02)"/>
+        </Style>
+        <Style Selector="Button:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.98)"/>
         </Style>
     </Application.Styles>
 </Application>

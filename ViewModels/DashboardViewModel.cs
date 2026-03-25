@@ -64,7 +64,7 @@ public partial class DashboardViewModel : ViewModelBase
         DistributionSeries = new ISeries[]
         {
             new PieSeries<int> { Values = new[] { CompleteCount }, Name = "Complete", Fill = new SolidColorPaint(SKColor.Parse("#2D8B7E")), InnerRadius = 60 },
-            new PieSeries<int> { Values = new[] { DraftCount }, Name = "Draft", Fill = new SolidColorPaint(SKColor.Parse("#F1F5F9")), InnerRadius = 60 }
+            new PieSeries<int> { Values = new[] { DraftCount }, Name = "Incomplete", Fill = new SolidColorPaint(SKColor.Parse("#F1F5F9")), InnerRadius = 60 }
         };
 
         var last7Days = Enumerable.Range(0, 7).Select(i => DateTime.Today.AddDays(-6 + i)).ToList();

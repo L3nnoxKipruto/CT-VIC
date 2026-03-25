@@ -13,13 +13,60 @@ public class DatabaseService
     public async Task InitializeAsync()
     {
         using var db = new AppDbContext();
-        await db.Database.EnsureCreatedAsync();
+        await db.Database.MigrateAsync();
+
+        // Self-Healing: Handle legacy column mismatches (sqlite)
+        var migrationSteps = new[] { 
+            "ScanningMode TEXT NOT NULL DEFAULT 'Helical'",
+            "IsAecUsed INTEGER NOT NULL DEFAULT 1",
+            "ReferencePhantom TEXT NOT NULL DEFAULT 'Body (16 cm)'",
+            "IsImageQualityAccepted INTEGER NOT NULL DEFAULT 1",
+            "Height REAL NOT NULL DEFAULT 0",
+            "CreatedAt TEXT NOT NULL DEFAULT '2026-01-01'",
+            "Status TEXT NOT NULL DEFAULT 'Incomplete'",
+            "IsAbdominopelvicTrauma INTEGER NOT NULL DEFAULT 0",
+            "IsAbdominopelvicMasses INTEGER NOT NULL DEFAULT 0"
+        };
+
+        foreach (var col in migrationSteps)
+        {
+            try
+            {
+                await db.Database.ExecuteSqlRawAsync($"ALTER TABLE Entries ADD COLUMN {col}");
+            }
+            catch { /* Ignore if exists */ }
+        }
+
+        // Fix NOT NULL constraint for legacy columns by adding defaults
+        try { await db.Database.ExecuteSqlRawAsync("ALTER TABLE Entries ADD COLUMN IsTrauma INTEGER DEFAULT 0"); } catch { }
+        try { await db.Database.ExecuteSqlRawAsync("ALTER TABLE Entries ADD COLUMN IsMasses INTEGER DEFAULT 0"); } catch { }
     }
 
     public async Task<List<Entry>> GetEntriesAsync()
     {
         using var db = new AppDbContext();
         return await db.Entries.OrderByDescending(e => e.CreatedAt).ToListAsync();
+    }
+
+    public async Task<Entry?> GetLatestEntryByPatientIdAsync(string patientId)
+    {
+        if (string.IsNullOrWhiteSpace(patientId)) return null;
+        using var db = new AppDbContext();
+        return await db.Entries
+            .Where(e => e.PatientId == patientId)
+            .OrderByDescending(e => e.CreatedAt)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<Entry>> GetEntriesByCategoryAsync(string category)
+    {
+        using var db = new AppDbContext();
+        return await db.Entries
+            .Where(e => (category == "Acute Abdomen" && e.IsAcuteAbdomen) ||
+                        (category == "Trauma" && e.IsAbdominopelvicTrauma) ||
+                        (category == "Masses" && e.IsAbdominopelvicMasses))
+            .OrderByDescending(e => e.CreatedAt)
+            .ToListAsync();
     }
 
     public async Task<bool> SaveEntryAsync(Entry entry)

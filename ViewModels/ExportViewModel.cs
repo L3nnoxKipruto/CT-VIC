@@ -15,6 +15,9 @@ public partial class ExportViewModel : ViewModelBase
         ExportDataCommand = new AsyncRelayCommand(ExportDataAsync);
     }
 
+    public System.Collections.ObjectModel.ObservableCollection<Entry> Entries => _recordsViewModel.Entries;
+    [ObservableProperty] private int _totalExportCount;
+
     public IAsyncRelayCommand ExportDataCommand { get; }
 
     [ObservableProperty] private string _exportStatusLine = "Ready to export securely.";

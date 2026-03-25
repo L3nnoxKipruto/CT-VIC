@@ -7,6 +7,7 @@
 .idea/
 .vscode/
 *.suo
+publish-windows/
 *.user
 *.sln.doccache
 *.cache
